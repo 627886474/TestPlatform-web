@@ -42,7 +42,9 @@
           @keyup.enter.native="handleLogin"
         />
         <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+          <svg-icon
+            :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"
+          />
         </span>
       </el-form-item>
 
@@ -51,30 +53,27 @@
         type="primary"
         style="width:100%;margin-bottom:30px;"
         @click.native.prevent="handleLogin"
-      >Login</el-button>
-      <!-- 
-      <div class="tips">
-        <span style="margin-right:20px;">username: admin</span>
-        <span> password: any</span>
-      </div>-->
+        >Login</el-button
+      >
+      <el-button
+        :loading="loading"
+        type="primary"
+        style="width:100%;margin-left:0px;"
+        @click.native.prevent="handleRegister"
+        >Register</el-button
+      >
     </el-form>
+
   </div>
 </template>
 
 <script>
 import { validUsername } from "@/utils/validate";
-import { setToken } from '@/utils/auth'
+import { setToken } from "@/utils/auth";
 
 export default {
   name: "Login",
   data() {
-    // const validateUsername = (rule, value, callback) => {
-    //   if (!validUsername(value)) {
-    //     callback(new Error('Please enter the correct user name'))
-    //   } else {
-    //     callback()
-    //   }
-    // }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
         callback(new Error("The password can not be less than 6 digits"));
@@ -85,24 +84,12 @@ export default {
     return {
       loginForm: {
         mobile: "",
-        password: "",
+        password: ""
       },
-      // loginRules: {
-      //   mobile: [{ required: true, trigger: 'blur', validator: validateUsername }],
-      //   password: [{ required: true, trigger: 'blur', validator: validatePassword }]
-      // },
       loading: false,
       passwordType: "password",
-      redirect: undefined,
+      redirect: undefined
     };
-  },
-  watch: {
-    $route: {
-      handler: function (route) {
-        this.redirect = route.query && route.query.redirect;
-      },
-      immediate: true,
-    },
   },
   methods: {
     showPwd() {
@@ -115,29 +102,32 @@ export default {
         this.$refs.password.focus();
       });
     },
-    async handleLogin() {
-      try{
-      const res = await this.$http.post(`user/login`, {
-        mobile: this.loginForm.mobile,
-        password: this.loginForm.password,
-      });
-      const { data, message, code } = res.data;
-      if (code === 200) {
-        //保存token
-        // localStorage.setItem("token", data.token);
-        setToken(data.token)
-        //跳转首页
-        this.$router.push({ path: this.redirect || '/' })
-        this.$message.success(message);
-        this.loading = false
-      } else {
-        this.$message.warning(message);
-      }
-      }catch (exception){
-        this.$message.warning(message);
-      }
+    handleRegister() {
+      this.$router.push({ path: "/register" });
     },
-  },
+    async handleLogin() {
+      try {
+        const res = await this.$http.post(`user/login`, {
+          mobile: this.loginForm.mobile,
+          password: this.loginForm.password
+        });
+        const { data, message, code } = res.data;
+        if (code === 200) {
+          //保存token
+          // localStorage.setItem("token", data.token);
+          setToken(data.token);
+          //跳转首页
+          this.$router.push({ path: this.redirect || "/" });
+          this.$message.success(message);
+          this.loading = false;
+        } else {
+          this.$message.warning(message);
+        }
+      } catch (exception) {
+        this.$message.warning(message);
+      }
+    }
+  }
 };
 </script>
 
